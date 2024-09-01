@@ -1,0 +1,85 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1C1C28;
+    color: #C7D0F1;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    background: #2A2A3E;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(191, 157, 242, 0.5);
+    width: 500px;
+}
+
+h1 {
+    color: #BF9DF2;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #C7D0F1;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="file"] {
+    border: 1px solid #333;
+    background: #2A2A3E;
+    color: #C7D0F1;
+    padding: 10px;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+    margin: 10px 0;
+    box-shadow: 0 0 10px rgba(191, 157, 242, 0.5);
+}
+
+button {
+    background: #BF9DF2;
+    color: #1C1C28;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #A77BCC;
+}
+
+a {
+    color: #BF9DF2;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin: 10px 0;
+}
+
+ul li a {
+    color: #C7D0F1;
+}
+
+ul li a:hover {
+    text-decoration: underline;
+}

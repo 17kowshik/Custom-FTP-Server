@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="scripts.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Uploaded Files</h1>
+        <ul id="files-list"></ul>
+        <a href="/" class="button">Back to Home</a>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/files-list')
+                .then(response => response.json())
+                .then(data => {
+                    const filesList = document.getElementById('files-list');
+                    data.files.forEach(file => {
+                        const listItem = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = `/download/${encodeURIComponent(file)}`;
+                        link.textContent = decodeURIComponent(file);
+                        const button = document.createElement('button');
+                        button.textContent = 'Download';
+                        button.onclick = () => window.location.href = link.href;
+                        listItem.appendChild(link);
+                        listItem.appendChild(button);
+                        filesList.appendChild(listItem);
+                    });
+                })
+                .catch(err => console.error('Error fetching file list:', err));
+        });
+    </script>
+</body>
+</html>
