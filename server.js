@@ -25,7 +25,7 @@ const upload = multer({
 });
 
 app.use(cors({
-  origin: 'http://localhost:8080'
+  origin: ['http://localhost:8080', 'https://custom-ftp-server.vercel.app/']
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
