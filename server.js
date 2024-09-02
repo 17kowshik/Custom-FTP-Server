@@ -2,22 +2,27 @@ require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { S3Client, PutObjectCommand, ListObjectsCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'ftp-root/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, file.originalname);
+// Configure AWS SDK
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });
 
-const upload = multer({ storage });
+const bucketName = process.env.S3_BUCKET_NAME;
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage()
+});
 
 app.use(cors({
   origin: 'http://localhost:8080'
@@ -64,31 +69,54 @@ app.get('/', authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.post('/upload', authMiddleware, upload.single('file'), (req, res) => {
-  res.redirect('/files');
+app.post('/upload', authMiddleware, upload.single('file'), async (req, res) => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).send('No file uploaded.');
+  }
+  const params = {
+    Bucket: bucketName,
+    Key: file.originalname,
+    Body: file.buffer,
+    ContentType: file.mimetype
+  };
+  try {
+    await s3.send(new PutObjectCommand(params));
+    res.redirect('/files');
+  } catch (err) {
+    res.status(500).send('Error uploading file.');
+  }
 });
 
 app.get('/files', authMiddleware, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'files.html'));
 });
 
-app.get('/files-list', authMiddleware, (req, res) => {
-  const directoryPath = path.join(__dirname, 'ftp-root');
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      return res.status(500).send('Unable to scan files!');
-    }
+app.get('/files-list', authMiddleware, async (req, res) => {
+  const params = {
+    Bucket: bucketName
+  };
+  try {
+    const data = await s3.send(new ListObjectsCommand(params));
+    const files = data.Contents.map(item => item.Key);
     res.json({ files });
-  });
+  } catch (err) {
+    res.status(500).send('Unable to list files.');
+  }
 });
 
-app.get('/download/:filename', authMiddleware, (req, res) => {
-  const filePath = path.join(__dirname, 'ftp-root', decodeURIComponent(req.params.filename));
-  res.download(filePath, err => {
-    if (err) {
-      res.status(500).send('File not found');
-    }
-  });
+app.get('/download/:filename', authMiddleware, async (req, res) => {
+  const params = {
+    Bucket: bucketName,
+    Key: decodeURIComponent(req.params.filename)
+  };
+  try {
+    const data = await s3.send(new GetObjectCommand(params));
+    res.attachment(params.Key);
+    data.Body.pipe(res);
+  } catch (err) {
+    res.status(500).send('File not found.');
+  }
 });
 
 app.listen(8080, () => {

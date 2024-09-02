@@ -1,8 +1,10 @@
+// Initially, this project used local storage for the FTP server. This file was configured for that setup. Later, the project was migrated to use an AWS S3 bucket for storage.
+
 const FTPSrv = require('ftp-srv');
 const path = require('path');
 
 const ftpServer = new FTPSrv({
-  url: 'ftp://0.0.0.0:2121', // Changed port for testing purposes
+  url: 'ftp://0.0.0.0:2121',
   pasv_url: '0.0.0.0',
   pasv_min: 1024,
   pasv_max: 1048,
